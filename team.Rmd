@@ -1,0 +1,16 @@
+---
+title: "team"
+author: "Michael Egle & John Chandara; GitHub: michaelegle & mrpotatofactory"
+date: "2/19/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+install.packages('readxl')
+dat <- readxl::read_xls('GSS.xls')
+```
+
