@@ -11,6 +11,18 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 install.packages('readxl')
+library(readxl)
+```
+```{r}
 dat <- readxl::read_xls('GSS.xls')
 ```
+```{r}
+str(dat)
+```
+```{r}
+indx <- sapply(dat, is.character)
+dat[indx] <- lapply(dat[indx], function(x) as.factor(as.character(x)))
+str(dat)
+```
 
+Now we have the string columns changed to factors.
