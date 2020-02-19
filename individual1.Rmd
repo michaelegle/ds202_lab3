@@ -1,0 +1,17 @@
+---
+title: 'Lab 3: Individual 1'
+author: 'John Chandara <chandara@iastate.edu>'
+date: '2/19/20'
+output: html_document
+---
+
+```{r}
+install.packages('readxl')
+dat <- readxl::read_xls('PATH_TO_EXL/GSS.xls')
+```
+
+# GSS Data Exploration
+
+## How does the happiness of a respondent relate to the political party affiliation?
+
+## 
