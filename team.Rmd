@@ -22,6 +22,7 @@ str(dat)
 ```{r}
 indx <- sapply(dat, is.character)
 dat[indx] <- lapply(dat[indx], function(x) as.factor(as.character(x)))
+names(dat) <- c('year', 'happiness', 'party', 'residence', 'sex', 'education', 'children', 'marriage', 'id', 'ballot')
 str(dat)
 ```
 
