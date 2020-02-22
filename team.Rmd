@@ -10,6 +10,10 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
+library(tidyverse)
+```
+
+```{r}
 install.packages('readxl')
 library(readxl)
 ```
@@ -27,3 +31,14 @@ str(dat)
 ```
 
 Now we have the string columns changed to factors.
+
+```{r}
+dat$children <- as.numeric(dat$children)
+str(dat)
+```
+
+# How does the happiness of a respondent relate to the marriage status?
+
+# Does the sex of the respondent affect the relationship you found in Q1?
+
+# How has the distribution of happiness changed over the years?
