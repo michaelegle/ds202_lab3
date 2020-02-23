@@ -27,6 +27,9 @@ str(dat)
 indx <- sapply(dat, is.character)
 dat[indx] <- lapply(dat[indx], function(x) as.factor(as.character(x)))
 names(dat) <- c('year', 'happiness', 'party', 'residence', 'sex', 'education', 'children', 'marriage', 'id', 'ballot')
+dat <- droplevels(dat[dat$happiness != 'No answer' & dat$happiness != 'Don\'t know' & dat$happiness != 'Not applicable', ])
+dat <- droplevels(dat[dat$party != 'No answer', ])
+dat$happiness <- factor(dat$happiness, c('Very happy', 'Pretty happy', 'Not too happy'))
 str(dat)
 ```
 
@@ -39,6 +42,77 @@ str(dat)
 
 # How does the happiness of a respondent relate to the marriage status?
 
+```{r}
+dat %>%
+  filter(marriage != "No answer", marriage != "NA") %>%
+  ggplot(aes(x = marriage, fill = factor(happiness))) +
+  geom_bar(position = "fill")
+```
+
+People who are currently married have the highest proportion of being "Very happy" and "Pretty happy". Married respondents also had the lowest proportion of "Not too happy" responses. Separated and divorced respondents had the highest proportion of "Not too happy" responses. There appears to be a positive relationship between marital status and happiness of the respondent.
+
 # Does the sex of the respondent affect the relationship you found in Q1?
 
+```{r}
+dat %>%
+  filter(marriage != "No answer", marriage != "NA") %>%
+  ggplot(aes(x = marriage, fill = factor(happiness))) +
+  geom_bar(position = "fill") +
+  facet_grid(. ~ sex)
+```
+
+The graphs are nearly identical between Males and Females, so I do not believe the sex of the respondent has an effect on the relationship between marital status and happiness.
+
 # How has the distribution of happiness changed over the years?
+
+```{r}
+dat %>%
+  filter(year != "NA") %>%
+  ggplot(aes(x = year, fill = factor(happiness))) +
+  geom_bar(position = "fill", binwidth = 2)
+```
+
+There isn't a ton of variance but it does appear that there's been a slight incline in "Not too happy" responses over the last 30 years.
+
+
+# Have political views become more polarized (i.e. more "Strong" republican/democrats in recent years) over time?
+
+```{r}
+unique(factor(dat$party))
+```
+
+Let's relevel these quick to make them go in order in our graphic.
+
+```{r}
+party_levels <- c("Strong democrat", "Not str democrat", "Ind,near dem",
+                  "Independent", "Ind,near rep", "Not str republican",
+                  "Strong republican", "Other party", "Don't know")
+levels(dat$party) <- party_levels
+levels(dat$party)
+```
+
+
+```{r}
+dat %>%
+  filter(party != "NA") %>%
+  ggplot(aes(x = year, fill = factor(party))) +
+  geom_bar(position = "fill", binwidth = 2) +
+  scale_fill_manual(values = c("blue", "deepskyblue1", "cadetblue2",
+                               "gray75", "lightpink2", "brown2",
+                               "red4", "springgreen", "white"),
+                    limits = party_levels)
+```
+
+The answer isn't entirely clear. Depending on how you define "political polarization", it could be yes or no. There's been an overall decrease in republican identifying respondents since 1990 but a reasonable increase in "Strong" republican identifying respondents in that same period. Meanwhile there has been a slight increase in democrats. So this could be considered a "polarization". On the other hand. There has been an overall decrease in republicans and increase in "other party" / "don't know" respondents recently.
+
+
+# How has the proportion of marital statuses change over time?
+
+```{r}
+dat %>%
+  filter(year != "NA") %>%
+  ggplot(aes(x = year, fill = factor(marriage))) +
+  geom_bar(position = "fill", binwidth = 2)
+```
+
+There are a few pretty noticeable trends in the data. The proportion of married respondents has decreased a lot from 1970 to the present. There's also been a big increase in respondents who were divorced or never married.
