@@ -1,6 +1,6 @@
 ---
-title: "team"
-author: "Michael Egle & John Chandara; GitHub: michaelegle & mrpotatofactory"
+title: "Lab 3 Report"
+author: "Michael Egle <michaelegle@iastate.edu>, John Chandara <chandara@iastate.edu>"
 date: "2/19/2020"
 output: html_document
 ---
@@ -11,18 +11,18 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 library(tidyverse)
+library(ggtern)
 ```
 
 ```{r}
 install.packages('readxl')
 library(readxl)
-```
-```{r}
 dat <- readxl::read_xls('GSS.xls')
-```
-```{r}
 str(dat)
 ```
+
+# Data Cleaning
+
 ```{r}
 indx <- sapply(dat, is.character)
 dat[indx] <- lapply(dat[indx], function(x) as.factor(as.character(x)))
@@ -31,6 +31,20 @@ dat <- droplevels(dat[dat$happiness != 'No answer' & dat$happiness != 'Don\'t kn
 dat <- droplevels(dat[dat$party != 'No answer', ])
 dat$happiness <- factor(dat$happiness, c('Very happy', 'Pretty happy', 'Not too happy'))
 str(dat)
+
+rotatedAxisElementText = function(angle,position='x'){
+  angle     = angle[1]; 
+  position  = position[1]
+  positions = list(x=0,y=90,top=180,right=270)
+  if(!position %in% names(positions))
+    stop(sprintf("'position' must be one of [%s]",paste(names(positions),collapse=", ")),call.=FALSE)
+  if(!is.numeric(angle))
+    stop("'angle' must be numeric",call.=FALSE)
+  rads  = (angle - positions[[ position ]])*pi/180
+  hjust = 0.5*(1 - sin(rads))
+  vjust = 0.5*(1 + cos(rads))
+  element_text(angle=angle,vjust=vjust,hjust=hjust)
+}
 ```
 
 Now we have the string columns changed to factors.
@@ -40,7 +54,9 @@ dat$children <- as.numeric(dat$children)
 str(dat)
 ```
 
-# How does the happiness of a respondent relate to the marriage status?
+# Exploration
+
+## How does the happiness of a respondent relate to the marriage status?
 
 ```{r}
 dat %>%
@@ -51,7 +67,7 @@ dat %>%
 
 People who are currently married have the highest proportion of being "Very happy" and "Pretty happy". Married respondents also had the lowest proportion of "Not too happy" responses. Separated and divorced respondents had the highest proportion of "Not too happy" responses. There appears to be a positive relationship between marital status and happiness of the respondent.
 
-# Does the sex of the respondent affect the relationship you found in Q1?
+## Does the sex of the respondent affect the relationship you found in Q1?
 
 ```{r}
 dat %>%
@@ -63,7 +79,7 @@ dat %>%
 
 The graphs are nearly identical between Males and Females, so I do not believe the sex of the respondent has an effect on the relationship between marital status and happiness.
 
-# How has the distribution of happiness changed over the years?
+## How has the distribution of happiness changed over the years?
 
 ```{r}
 dat %>%
@@ -75,7 +91,7 @@ dat %>%
 There isn't a ton of variance but it does appear that there's been a slight incline in "Not too happy" responses over the last 30 years.
 
 
-# Have political views become more polarized (i.e. more "Strong" republican/democrats in recent years) over time?
+## Have political views become more polarized (i.e. more "Strong" republican/democrats in recent years) over time?
 
 ```{r}
 unique(factor(dat$party))
@@ -106,7 +122,7 @@ dat %>%
 The answer isn't entirely clear. Depending on how you define "political polarization", it could be yes or no. There's been an overall decrease in republican identifying respondents since 1990 but a reasonable increase in "Strong" republican identifying respondents in that same period. Meanwhile there has been a slight increase in democrats. So this could be considered a "polarization". On the other hand. There has been an overall decrease in republicans and increase in "other party" / "don't know" respondents recently.
 
 
-# How has the proportion of marital statuses change over time?
+## How has the proportion of marital statuses change over time?
 
 ```{r}
 dat %>%
@@ -116,3 +132,59 @@ dat %>%
 ```
 
 There are a few pretty noticeable trends in the data. The proportion of married respondents has decreased a lot from 1970 to the present. There's also been a big increase in respondents who were divorced or never married.
+
+
+## How does the happiness of a respondent relate to the political party affiliation?
+
+```{r}
+  dat2 <- dat
+
+  parties <- levels(dat2$party)
+  levels(dat2$party)[levels(dat2$party) == 'Not str democrat' | levels(dat2$party) == 'Strong democrat'] <- 'Democrat'
+
+  levels(dat2$party)[levels(dat2$party) == 'Not str republican' | levels(dat2$party) == 'Strong republican'] <- 'Republican'
+
+  levels(dat2$party)[levels(dat2$party) == 'Don\'t know' | levels(dat2$party) == 'Other party'] <- 'Republican'
+
+  levels(dat2$party)[levels(dat2$party) == 'Independent' | levels(dat2$party) == 'Ind,near dem' | levels(dat2$party) == 'Ind,near rep'] <- 'Independent'
+
+  dat2 %>%
+    ggplot(aes(x = party, fill = happiness)) + geom_bar(position = 'fill')
+```
+  Based on the results, republicans appear to be much more happier than independent and democratic respondents by a well margin.
+
+## Is political affiliation affected by education?
+
+```{r}
+  dat2$education <- factor(dat2$education, c('No answer', 'Don\'t know','Lt high school', 'High school','Junior college', 'Bachelor', 'Graduate'))
+
+  filtered <- droplevels(dat2[dat2$education != 'No answer' & dat2$education != 'Don\'t know', ])
+
+  filtered %>%
+    ggplot(aes(x = education, fill = education)) + geom_bar() + facet_wrap(~party) + theme(axis.text.x = rotatedAxisElementText(90,'x'))
+
+```
+
+From this data, we can conclude that respondent with the highest education level in junior college typically swing twords independent or democratic ideologies. Time afterwards, their ideology may swing a bit republican however, this isn't strong enough as a small percentage more of full graduates are democrats.
+
+  
+
+### How does the political affiliation affect place of residence?
+
+
+```{r}
+  levels(dat2$residence)[levels(dat2$residence) == 'E. nor. central' | levels(dat2$residence) == 'W. nor. central'] <- 'North'
+
+  levels(dat2$residence)[levels(dat2$residence) == 'New england' | levels(dat2$residence) == 'Middle atlantic' | levels(dat2$residence) == 'South atlantic'] <- 'East'
+
+  levels(dat2$residence)[levels(dat2$residence) == 'E. sou. central' | levels(dat2$residence) == 'W. sou. central'] <- 'South'
+
+  levels(dat2$residence)[levels(dat2$residence) == 'Mountain' | levels(dat2$residence) == 'Pacific' | levels(dat2$residence) == 'Ind,near rep'] <- 'West'
+
+  dat2$residence <- factor(dat2$residence, c('North', 'East', 'South', 'West', 'Foreign'))
+
+  dat2 %>%
+    ggplot(aes(x = residence, fill = party)) + geom_bar(position = 'fill', width = 1) + coord_polar()
+```
+
+For the most part, all regions of the United States appear to be in quite equal in representation. Though, we see a bit more Republican respondents in the North and West. For democrats, we see a magnitude more in the south. As for Foreign respondent, there appears to be less republican-centered respondent.
